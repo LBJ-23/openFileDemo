@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    html,body,#container{
+        width: 100%;
+        height: 100%;
+        background: black;
+        color: white;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+    #container{
+        display: flex;
+        flex-direction: column;
+    }
+    #titlebar{
+        display: flex;
+        height: 10%;
+        align-items: center;
+        justify-content: center;
+        flex: 1 1 auto;
+        margin-top: 20px;
+    }
+    button{
+        height: 50px;
+        width: 100px;
+        margin-right: 20px;
+        margin-left: 20px;
+    }
+
+    #content{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 90%;
+        background-color: black;
+    }
+    #con{
+        height: 90%;
+        width: 90%;
+        margin: 5%;
+        font-size: 30px;
+    }
+    #img{
+        height: 90%;
+        width: 90%;
+        margin: 5%;
+    }
+    #vid{
+        height: 90%;
+        width: 90%;
+        margin: 5%;
+    }
+</style>
+<body>
+    <div id="container">
+        <div id="titlebar">
+            <button onclick="openfile()" id="op">open file</button>
+            <button onclick="savefile()" style="display: none" id="sa">save file</button>
+        </div>
+        <div id="content" style="display: none">
+            <textarea id="con"  ></textarea>
+            <img src="" id="img" style="display: none">
+            <video  controls="controls" style="display: none" src="" id="vid">
+            </video>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById("img").src = "C:/Users/admin/Desktop/1.jpg;base64"
+    function openfile(){
+        RPC.invoke("open_file",{ }).then(file=>{
+            document.getElementById("content").style = "display: inline"
+            if (file[0] == "txt"){
+                document.getElementById("con").value = file[2]
+                document.getElementById("con").src = file[1]
+                document.getElementById("con").style = "display: inline"
+                document.getElementById("img").style = "display: none"
+                document.getElementById("vid").style = "display: none"
+                document.getElementById("sa").style= "display: inline"
+            }
+            if(file[0] == "jpg"){
+                document.getElementById("img").src = file[1]
+                document.getElementById("img").style = "display: inline"
+                document.getElementById("con").style = "display: none"
+                document.getElementById('vid').style = "display: none"
+                document.getElementById("sa").style = "display: none"
+            }
+            if(file[0] == "webm"){
+                document.getElementById("vid").src = file[1]
+                document.getElementById("vid").style = "display: inline"
+                document.getElementById("con").style = "display: none"
+                document.getElementById("img").style = "display: none"
+                document.getElementById("sa").style = "display: none"
+            }
+
+        })
+    }
+    function savefile(){
+        let text = document.getElementById("con").value
+        let src = document.getElementById("con").src
+        let msg = [src, text]
+        RPC.invoke("save_file",{msg}).then((e)=>{
+            if (e==1){
+                alert("保存成功！")
+            }
+            else alert("保存失败！")
+        })
+    }
+    RPC.connect().then(() => {})
+    let doc = document.getElementById("container")
+    doc.addEventListener("qtDrop",(ev)=>{
+        ev.preventDefault()
+        ev.stopPropagation()
+        let msg = ev.data
+        RPC.invoke("open",{msg}).then((e)=>{
+            document.getElementById("content").style = "display: inline"
+            if (e[0] == "txt"){
+                document.getElementById("con").value = e[2]
+                document.getElementById("con").src = e[1]
+                document.getElementById("con").style = "display: inline"
+                document.getElementById("img").style = "display: none"
+                document.getElementById("vid").style = "display: none"
+                document.getElementById("sa").style = "display: inline"
+            }
+            if(e[0] == "jpg"){
+                document.getElementById("img").src = e[1]
+                document.getElementById("img").style = "display: inline"
+                document.getElementById("vid").style = "display: none"
+                document.getElementById("con").style = "display: none"
+                document.getElementById("sa").style = "display: none"
+            }
+            if(e[0] == "webm"){
+                document.getElementById("vid").src = e[1]
+                document.getElementById("vid").style = "display: inline"
+                document.getElementById("con").style = "display: none"
+                document.getElementById("img").style = "display: none"
+                document.getElementById("sa").style = "display: none"
+            }
+            if (e[0] == "no_filetype"){
+                document.getElementById("content").style = "display: none"
+                document.getElementById("sa").style = "display: none"
+                alert("无法识别该文件类型,仅支持txt、jpg、webm文件类型")
+            }
+        })
+    })
+    window.addEventListener("message",(event) => {
+        if (event.data == "open"){
+            openfile()
+        }
+        if ( event.data == "save"){
+            savefile()
+        }
+    })
+</script>
+</html>

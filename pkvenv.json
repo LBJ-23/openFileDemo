@@ -1,0 +1,10 @@
+{
+    "name": "openFileDemo",
+    "entry_point": "openFileDemo.openFileDemo:main",
+    "venv": "./venv",
+    "gui": true,
+    "include" : [
+        "mmgui",
+        "openFileDemo"
+    ]
+}
